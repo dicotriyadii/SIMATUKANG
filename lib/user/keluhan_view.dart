@@ -1,6 +1,7 @@
 import 'dart:io';
 // import 'package:aplikasi_keluhan/Home/profile_view.dart';
 // import 'package:aplikasi_keluhan/Home/riwayat_view.dart';
+import 'package:aplikasi_simatukang/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
@@ -31,29 +32,99 @@ class _keluhanPageState extends State<keluhanPage> {
   TextEditingController nama = new TextEditingController();
   TextEditingController telepon = new TextEditingController();
   XFile? image1;
-  XFile? image2;
-  XFile? image3;
   List? data = [];
   DateTime _tanggalLahir = DateTime.now();
+
+  Future sendImage(ImageSource media, String nomorTelepon, String deskripsi,
+      String nama) async {
+    var img = await picker.pickImage(source: media);
+    var uri = "http://192.168.156.89/project/APISimatukang/api/Keluhan";
+    // var uri = "https://wifitermurah.com/APIOerLens/ProsesOer";
+    var request = http.MultipartRequest('POST', Uri.parse(uri));
+    request.fields.addAll(
+        {'nomorTelepon': nomorTelepon, 'keluhan': deskripsi, 'nama': nama});
+
+    if (img != null) {
+      var pic = await http.MultipartFile.fromPath("gambar1", img.path);
+      request.files.add(pic);
+      await request.send().then((result) {
+        http.Response.fromStream(result).then((response) {
+          var message = jsonDecode(response.body);
+          // show snackbar if input data successfully
+          if (response.statusCode == 200) {
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.success,
+              borderSide: const BorderSide(
+                color: Colors.green,
+                width: 2,
+              ),
+              width: 280,
+              buttonsBorderRadius: const BorderRadius.all(
+                Radius.circular(2),
+              ),
+              headerAnimationLoop: false,
+              animType: AnimType.bottomSlide,
+              title: 'Penyampaian Berhasil',
+              desc: message['messages'].toString(),
+              showCloseIcon: true,
+              btnCancelOnPress: () {},
+              btnOkOnPress: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                );
+              },
+            ).show();
+            return "Success!";
+          } else {
+            AwesomeDialog(
+              context: context,
+              dialogType: DialogType.error,
+              borderSide: const BorderSide(
+                color: Colors.green,
+                width: 2,
+              ),
+              width: 280,
+              buttonsBorderRadius: const BorderRadius.all(
+                Radius.circular(2),
+              ),
+              headerAnimationLoop: false,
+              animType: AnimType.bottomSlide,
+              title: 'Penyampaian Gagal',
+              desc: message['messages'].toString(),
+              showCloseIcon: true,
+              btnCancelOnPress: () {},
+              btnOkOnPress: () {
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => LoginPage()),
+                // );
+              },
+            ).show();
+            return "Success!";
+          }
+          // setState(() {
+          //   image = img;
+          //   Red = message['data']['red'].toString();
+          //   Green = message['data']['green'].toString();
+          //   Blue = message['data']['blue'].toString();
+          //   Oer = message['data']['oer'].toString();
+          // });
+        });
+      }).catchError((e) {
+        print(e);
+      });
+    } else {
+      final snackBar = SnackBar(content: Text("Gagal Upload Gambar"));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
 
   Future getImage1(ImageSource media) async {
     var img1 = await picker.pickImage(source: media);
     setState(() {
       image1 = img1;
-    });
-  }
-
-  Future getImage2(ImageSource media) async {
-    var img2 = await picker.pickImage(source: media);
-    setState(() {
-      image2 = img2;
-    });
-  }
-
-  Future getImage3(ImageSource media) async {
-    var img3 = await picker.pickImage(source: media);
-    setState(() {
-      image3 = img3;
     });
   }
 
@@ -127,45 +198,20 @@ class _keluhanPageState extends State<keluhanPage> {
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             title: Text('Silahkan Pilih Gambar'),
             content: Container(
-              height: MediaQuery.of(context).size.height / 5,
+              height: MediaQuery.of(context).size.height / 15,
               child: Column(
                 children: [
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      getImage1(ImageSource.gallery);
-                      // sendImage(ImageSource.gallery);
+                      // getImage1(ImageSource.gallery);
+                      sendImage(ImageSource.gallery, telepon.text,
+                          deskripsi.text, nama.text);
                     },
                     child: Row(
                       children: [
                         Icon(Icons.image),
                         Text(' Upload Gambar 1'),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      getImage2(ImageSource.gallery);
-                      // sendImage(ImageSource.gallery);
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.image),
-                        Text(' Upload Gambar 2'),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      getImage3(ImageSource.gallery);
-                      // sendImage(ImageSource.gallery);
-                    },
-                    child: Row(
-                      children: [
-                        Icon(Icons.image),
-                        Text(' Upload Gambar 3'),
                       ],
                     ),
                   ),
@@ -328,120 +374,6 @@ class _keluhanPageState extends State<keluhanPage> {
                             SizedBox(
                               height: 10,
                             ),
-                            image1 != null
-                                ? Container(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Text(
-                                          "Gambar Pertama",
-                                          style: TextStyle(fontSize: 20),
-                                        ),
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.file(
-                                              //to show image, you type like this.
-                                              File(image1!.path),
-                                              fit: BoxFit.cover,
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              height: 400,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                      ],
-                                    ),
-                                  )
-                                : Text(
-                                    "No Image",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            image2 != null
-                                ? Container(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.file(
-                                              //to show image, you type like this.
-                                              File(image2!.path),
-                                              fit: BoxFit.cover,
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              height: 400,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                      ],
-                                    ),
-                                  )
-                                : Text(
-                                    "No Image",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            image3 != null
-                                ? Container(
-                                    child: Column(
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20),
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                            child: Image.file(
-                                              //to show image, you type like this.
-                                              File(image3!.path),
-                                              fit: BoxFit.cover,
-                                              width: MediaQuery.of(context)
-                                                  .size
-                                                  .width,
-                                              height: 400,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                      ],
-                                    ),
-                                  )
-                                : Text(
-                                    "No Image",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                              width: 500,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  // tambahkeluhan();
-                                },
-                                child: Text('Kirim Permohonan keluhan'),
-                                style: ElevatedButton.styleFrom(
-                                    primary: Color.fromRGBO(255, 202, 0, 1)),
-                              ),
-                            )
                           ],
                         ),
                       ),

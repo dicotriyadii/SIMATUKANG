@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
+// Page
 import 'package:aplikasi_simatukang/login_view.dart';
 import 'package:aplikasi_simatukang/register_view.dart';
 import 'package:aplikasi_simatukang/user/keluhan_view.dart';
 import 'package:aplikasi_simatukang/user/profil_view.dart';
 import 'package:aplikasi_simatukang/user/dashboard_view.dart';
 import 'package:aplikasi_simatukang/admin/dashboardAdmin_view.dart';
-import 'package:flutter/material.dart';
-// import 'package:aplikasi_simatukang/home/home_view.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -20,6 +24,92 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController nomorTelepon = new TextEditingController();
   TextEditingController password = new TextEditingController();
   bool passwordVisible = false;
+  List? data;
+  var role = "";
+
+  // API
+  Future<String> Login(String nomorTelepon, String password) async {
+    final response = await http.post(
+      Uri.parse('http://192.168.156.89/project/APISimatukang/api/Login'),
+      // Uri.parse('https://wifitermurah.com/APIDokumentasi/api/Login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Cookie': 'ci_session=ik0j0msiovnqb1cic6hksgb7372jg79f'
+      },
+      body: jsonEncode(<String, String>{
+        'nomorTelepon': nomorTelepon,
+        'password': password,
+      }),
+    );
+
+    void setIntoSharedPreferences() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString("nomorTelepon", nomorTelepon);
+      await prefs.setString("role", role);
+    }
+
+    if (response.statusCode == 200) {
+      setState(() {
+        var resBody = json.decode(response.body);
+        data = resBody;
+      });
+      setIntoSharedPreferences();
+      nomorTelepon = data?[0]['data']['nomorTelepon'];
+      role = data?[0]['data']['role'];
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        borderSide: const BorderSide(
+          color: Colors.green,
+          width: 2,
+        ),
+        width: 280,
+        buttonsBorderRadius: const BorderRadius.all(
+          Radius.circular(2),
+        ),
+        headerAnimationLoop: false,
+        animType: AnimType.bottomSlide,
+        title: 'Login Berhasil',
+        desc: 'Selamat Datang di SIMATUKANG',
+        showCloseIcon: true,
+        btnCancelOnPress: () {},
+        btnOkOnPress: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => dashboardPage()),
+          );
+        },
+      ).show();
+      return "Success!";
+    } else {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        borderSide: const BorderSide(
+          color: Colors.green,
+          width: 2,
+        ),
+        width: 280,
+        buttonsBorderRadius: const BorderRadius.all(
+          Radius.circular(2),
+        ),
+        headerAnimationLoop: false,
+        animType: AnimType.bottomSlide,
+        title: 'Login Gagal',
+        desc: 'Username Atau Password salah, Silahkan coba lagi',
+        showCloseIcon: true,
+        btnCancelOnPress: () {},
+        btnOkOnPress: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        },
+      ).show();
+      return "Gagal";
+    }
+  }
+
   void togglePassword() {
     setState(() {
       passwordVisible = !passwordVisible;
@@ -142,11 +232,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => dashboardAdminPage()),
-                              );
+                              Login(nomorTelepon.text, password.text);
                             },
                           ),
                         ),
