@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:aplikasi_simatukang/login_view.dart';
+import 'package:aplikasi_simatukang/login_view.dart';
 import 'package:aplikasi_simatukang/register_view.dart';
 import 'package:aplikasi_simatukang/user/keluhan_view.dart';
 import 'package:aplikasi_simatukang/user/profil_view.dart';
