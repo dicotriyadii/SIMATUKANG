@@ -157,11 +157,11 @@ class _detailNotifikasiPageState extends State<detailNotifikasiPage> {
                           children: <Widget>[
                             ElevatedButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => permohonanPage()),
-                                );
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) => permohonanPage()),
+                                // );
                               },
                               child: Text('Permohonan Tukang'),
                               style: ElevatedButton.styleFrom(

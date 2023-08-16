@@ -12,19 +12,21 @@ import 'package:carousel_slider/carousel_slider.dart';
 // import 'package:aplikasi_dashboard/home/home_view.dart';
 
 class dashboardPage extends StatefulWidget {
-  dashboardPage({
-    Key? key,
-  }) : super(key: key);
+  final token;
+  final nomorTelepon;
+  dashboardPage({Key? key, required this.token, required this.nomorTelepon})
+      : super(key: key);
 
   @override
-  State<dashboardPage> createState() => _dashboardPageState();
+  State<dashboardPage> createState() =>
+      _dashboardPageState(token: token, nomorTelepon: nomorTelepon);
 }
 
 class _dashboardPageState extends State<dashboardPage> {
-  _dashboardPageState({
-    Key? key,
-  });
-
+  _dashboardPageState(
+      {Key? key, required this.token, required this.nomorTelepon});
+  final token;
+  final nomorTelepon;
   int _currentIndex = 0;
   int _currentIndexCarousel = 0;
   String _currentMenu = 'Home';
@@ -56,13 +58,21 @@ class _dashboardPageState extends State<dashboardPage> {
         _currentMenu = 'Beranda';
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => dashboardPage()),
+          MaterialPageRoute(
+              builder: (context) => dashboardPage(
+                    token: token,
+                    nomorTelepon: nomorTelepon,
+                  )),
         );
       } else if (index == 1) {
         _currentMenu = 'Riwayat';
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => riwayatPage()),
+          MaterialPageRoute(
+              builder: (context) => riwayatPage(
+                    token: token,
+                    nomorTelepon: nomorTelepon,
+                  )),
         );
       } else if (index == 2) {
         _currentMenu = 'Permohonan';
@@ -224,7 +234,10 @@ class _dashboardPageState extends State<dashboardPage> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>
-                                                permohonanPage()));
+                                                permohonanPage(
+                                                  jenisPermohonan: 1,
+                                                  token: token,
+                                                )));
                                   },
                                   child: Container(
                                       child: Center(

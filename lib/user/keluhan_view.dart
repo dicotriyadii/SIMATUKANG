@@ -38,7 +38,7 @@ class _keluhanPageState extends State<keluhanPage> {
   Future sendImage(ImageSource media, String nomorTelepon, String deskripsi,
       String nama) async {
     var img = await picker.pickImage(source: media);
-    var uri = "http://192.168.156.89/project/APISimatukang/api/Keluhan";
+    var uri = "http://10.1.12.49/project/APISimatukang/api/Keluhan";
     // var uri = "https://wifitermurah.com/APIOerLens/ProsesOer";
     var request = http.MultipartRequest('POST', Uri.parse(uri));
     request.fields.addAll(
@@ -66,7 +66,8 @@ class _keluhanPageState extends State<keluhanPage> {
               headerAnimationLoop: false,
               animType: AnimType.bottomSlide,
               title: 'Penyampaian Berhasil',
-              desc: message['messages'].toString(),
+              desc: message['messages'].toString() +
+                  'Silahkan Login terlebih dahulu untuk mendapatkan notifikasi selanjutnya',
               showCloseIcon: true,
               btnCancelOnPress: () {},
               btnOkOnPress: () {
