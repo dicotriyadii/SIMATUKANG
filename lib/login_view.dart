@@ -26,11 +26,12 @@ class _LoginPageState extends State<LoginPage> {
   bool passwordVisible = false;
   List? data;
   var role = "";
+  var token = "";
 
   // API
   Future<String> Login(String nomorTelepon, String password) async {
     final response = await http.post(
-      Uri.parse('http://192.168.156.89/project/APISimatukang/api/Login'),
+      Uri.parse('http://10.1.12.49/project/APISimatukang/api/Login'),
       // Uri.parse('https://wifitermurah.com/APIDokumentasi/api/Login'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
@@ -46,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString("nomorTelepon", nomorTelepon);
       await prefs.setString("role", role);
+      await prefs.setString("token", token);
     }
 
     if (response.statusCode == 200) {
@@ -56,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
       setIntoSharedPreferences();
       nomorTelepon = data?[0]['data']['nomorTelepon'];
       role = data?[0]['data']['role'];
+      token = data?[0]['data']['token'];
       AwesomeDialog(
         context: context,
         dialogType: DialogType.success,
@@ -76,7 +79,11 @@ class _LoginPageState extends State<LoginPage> {
         btnOkOnPress: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => dashboardPage()),
+            MaterialPageRoute(
+                builder: (context) => dashboardPage(
+                      token: token,
+                      nomorTelepon: nomorTelepon,
+                    )),
           );
         },
       ).show();

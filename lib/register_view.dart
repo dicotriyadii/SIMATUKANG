@@ -1,5 +1,10 @@
 import 'dart:async';
-
+import 'package:flutter/material.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+// Page
 import 'package:aplikasi_simatukang/login_view.dart';
 import 'package:aplikasi_simatukang/register_view.dart';
 import 'package:aplikasi_simatukang/user/keluhan_view.dart';
@@ -17,10 +22,86 @@ class _registerPageState extends State<registerPage> {
   TextEditingController nomorTelepon = new TextEditingController();
   TextEditingController password = new TextEditingController();
   bool passwordVisible = false;
+  List? data;
   void togglePassword() {
     setState(() {
       passwordVisible = !passwordVisible;
     });
+  }
+
+  //
+  Future<String> Register(String nomorTelepon, String password) async {
+    final response = await http.post(
+      Uri.parse('http://10.1.12.49/project/APISimatukang/api/Register'),
+      // Uri.parse('https://wifitermurah.com/APIDokumentasi/api/Login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Cookie': 'ci_session=ik0j0msiovnqb1cic6hksgb7372jg79f'
+      },
+      body: jsonEncode(<String, String>{
+        'nomorTelepon': nomorTelepon,
+        'password': password,
+        'role': 'user'
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        var resBody = json.decode(response.body);
+        data = resBody;
+      });
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.success,
+        borderSide: const BorderSide(
+          color: Colors.green,
+          width: 2,
+        ),
+        width: 280,
+        buttonsBorderRadius: const BorderRadius.all(
+          Radius.circular(2),
+        ),
+        headerAnimationLoop: false,
+        animType: AnimType.bottomSlide,
+        title: 'Login Berhasil',
+        desc: data?[0]['messages'].toString(),
+        showCloseIcon: true,
+        btnCancelOnPress: () {},
+        btnOkOnPress: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        },
+      ).show();
+      return "Success!";
+    } else {
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.error,
+        borderSide: const BorderSide(
+          color: Colors.green,
+          width: 2,
+        ),
+        width: 280,
+        buttonsBorderRadius: const BorderRadius.all(
+          Radius.circular(2),
+        ),
+        headerAnimationLoop: false,
+        animType: AnimType.bottomSlide,
+        title: 'Login Gagal',
+        desc: data?[0]['messages'].toString(),
+        showCloseIcon: true,
+        btnCancelOnPress: () {},
+        btnOkOnPress: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+          );
+        },
+      ).show();
+      return "Gagal";
+    }
   }
 
   @override
@@ -140,11 +221,7 @@ class _registerPageState extends State<registerPage> {
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => keluhanPage()),
-                              );
+                              Register(nomorTelepon.text, password.text);
                             },
                           ),
                         ),
